@@ -1,6 +1,6 @@
 import datetime
 import logging
-from . import kanio
+from . import fattyio
 from dateutil import parser
 
 def time_in_range(intime,starttime,endtime,offset=datetime.timedelta(seconds=60)):

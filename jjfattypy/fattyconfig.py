@@ -4,7 +4,7 @@
 USAGE
 =======
 
-myconfigs=kanconfig.kanConfig("filename.cnf")
+myconfigs=fattyconfig.fattyConfig("filename.cnf")
 
 
 Set log
@@ -37,13 +37,13 @@ import os.path
 
 import logging
 
-from kansha import kanio,kanlog
+from jjfattypy import fattyio,fattylog
 
 
 #this is used to separate values within a config that takes multiple values
 LISTSPLITTER=","
 
-class kanConfig:
+class fattyConfig:
 	
     def __init__(self,config_file,encoding=None):
         """custom config option, includes configparser object as self.config"""
@@ -51,9 +51,9 @@ class kanConfig:
         #check if config file exists
         if not os.path.isfile(config_file):
 			#if it doesnt, make a new one
-            kanio.display("No config file found at path %s"%config_file)
+            fattyio.display("No config file found at path %s"%config_file)
             while not os.path.isfile(config_file):
-                config_file=kanio.prompt_file(os.path.dirname(config_file),os.path.basename(config_file),nocheck=1)
+                config_file=fattyio.prompt_file(os.path.dirname(config_file),os.path.basename(config_file),nocheck=1)
 
         self.filename=config_file
 		
@@ -63,30 +63,30 @@ class kanConfig:
                 self.config.read(self.filename,encoding=enc)
             except UnicodeDecodeError:
                 if not enc==None:
-                    kanio.display("Unable to load config file with encoding %s"%enc)
+                    fattyio.display("Unable to load config file with encoding %s"%enc)
             else:
                 break
 
     def set_log(self,verbose=0,basename=""):
         """open a logfile"""
         log_dir=self.config.get("dir","logs") or self.config.get("dir","log")
-        kanlog.setlog(basename,verbose)        
+        fattylog.setlog(basename,verbose)        
         
     def file_in_dir(self,dir_config_opt,newest=True):
         """return file from within the directory specified by <dir_config_opt>, within the [dir] section of the config file"""
         idir=self.config.get("dir",dir_config_opt)
-        newest_file=kanio.newest_file_in(idir)
+        newest_file=fattyio.newest_file_in(idir)
         if newest:
             return newest_file
         else:
-            return kanio.prompt_file(idir,os.path.basename(newest_file))
+            return fattyio.prompt_file(idir,os.path.basename(newest_file))
 
     def new_filename_in_dir(self,dir_config_opt,basename="",append_date=0):
         """make a new filename in the directory specified by the given dir_config_opt"""
         odir=self.config.get("dir",dir_config_opt)
         
         if append_date or basename=="":
-            basename=kanio.date_filename(basename)
+            basename=fattyio.date_filename(basename)
 
         full_path=os.path.join(odir,basename)
         return full_path
@@ -131,11 +131,11 @@ class kanConfig:
                     full_path=os.path.join(mapping_file_dir,basename)
                 else:
                     logging.info("Unable to find file %s in directory %s"%(basename,mapping_file_dir))
-                    kanio.display("Unable to find file %s in directory %s"%(basename,mapping_file_dir))
+                    fattyio.display("Unable to find file %s in directory %s"%(basename,mapping_file_dir))
                     default_file=""
                     if newest or force:
                         default_file=newest_file_in(mapping_file_dir)                
-                    full_path=kanio.prompt_file(mapping_file_dir,default_file,nocheck=force,file_title="column mapping file")
+                    full_path=fattyio.prompt_file(mapping_file_dir,default_file,nocheck=force,file_title="column mapping file")
 
         else:
             logging.error("Unable to find the directory of the mapping file: %s"%mapping_file_dir)
@@ -156,7 +156,7 @@ def parse_mapping_file(ifile,header=False,delimiter="\t"):
         logging.error("Given input file %s is not a file, unable to produce mapping data")
         return None
     else:
-        csv_dets=kanio.kan_csv_dets(ifile)        
+        csv_dets=fattyio.fatty_csv_dets(ifile)        
         with open(csv_dets["filename"],encoding=csv_dets["encoding"]) as ifh:
             icsv=csv.reader(ifh,delimiter=csv_dets["delimiter"])
             rownum=0
@@ -182,9 +182,9 @@ def parse_mapping_file(ifile,header=False,delimiter="\t"):
     return mapping
 
 
-def kansha_configs():
-    """return kanConfig object based on a default configuration file"""
+def fatty_configs():
+    """return fattyConfig object based on a default configuration file"""
 
-    configs=kanConfig(os.path.join(os.path.dirname(__file__),"..",".kansha.default"))    
+    configs=fattyConfig(os.path.join(os.path.dirname(__file__),"..",".jjfattypy"))    
     
     return configs

@@ -1,7 +1,7 @@
-"""Unit tests for the kanbugs database"""
+"""Unit tests for the fattybugs database"""
 
 import unittest
-from kansha import kanbugs,kanconfig
+from jjfattypy import fattybugs,fattyconfig
 import datetime
 import os
 
@@ -9,7 +9,7 @@ class TestBugDB(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.configs=kanconfig.kanConfig(os.path.join(os.path.dirname(__file__),"..",".kansha.default"))        
+        cls.configs=fattyconfig.fattyConfig(os.path.join(os.path.dirname(__file__),"..",".jjfattypy"))        
         cls.db_file=cls.configs.config.get("bug_db","test_file")
         cls.schema_file=cls.configs.config.get("bug_db","schema_file")
 
@@ -18,10 +18,10 @@ class TestBugDB(unittest.TestCase):
             os.remove(cls.db_file)
 
         #create the new file
-        kanbugs.build_db(cls.db_file,cls.schema_file)
+        fattybugs.build_db(cls.db_file,cls.schema_file)
 
         #initialize the bug database
-        cls.BugDB=kanbugs.BugDB(cls.db_file)
+        cls.BugDB=fattybugs.BugDB(cls.db_file)
 
     @classmethod
     def tearDownClass(cls):

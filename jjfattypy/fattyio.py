@@ -21,8 +21,6 @@ import string
 import random
 import traceback
 
-import jctconv
-
 def is_in_parentheses(inword):
     """returns True if inword is consists of one big parenthesized inner block
     
@@ -303,7 +301,7 @@ def find_newest_date_dir(base_dir):
 
 def wait(text="Press enter key to continue...",msg="Ctrl-C to end script"):
     """wait until the user does something"""
-    anykey=kanprompt(text,default=msg)
+    anykey=fattyprompt(text,default=msg)
     return 0
 
 def make_time_obj(time_str,format="%Y/%m/%d %H:%M"):
@@ -361,7 +359,7 @@ def convert_file_to(infilename,delimiter="\t",encoding="utf8"):
     return newfn
     
 
-def kan_csv_dets(filename,delimiters=["\t",",","^I",";"],encodings=["sjis","utf8","utf16","cp932"],close=False):
+def fatty_csv_dets(filename,delimiters=["\t",",","^I",";"],encodings=["sjis","utf8","utf16","cp932"],close=False):
     """return various details and data based on a given filename, this is a brute force approach when encodings are an issue, make a file with each of them"""
     ifh_dets={}
     delimter=delimiters[0]
@@ -584,7 +582,7 @@ def files_in_dir(direc,nocheck=1,file_types=[],exclude_files=[]):
 #    display("Dir:"+direc)
     if not nocheck:
         while not query_yes_no("Is the following list of files ok?\n"+", ".join(files),default="y"):
-            files=glob(kanprompt("enter a new directory:",default=direc)+"//*")
+            files=glob(fattyprompt("enter a new directory:",default=direc)+"//*")
     
     files = [ afile.replace("////","//") for afile in files]
         
@@ -634,14 +632,14 @@ def pdisplay(*args):
         pprint.pprint(a)
     return None
     
-def kanprompt(text,default=""):
+def fattyprompt(text,default=""):
     """prompt for input, with default value"""
     return input(text+" [%s]> " % default) or default
     
 def intprompt(text,default_int=0):
     """return an integer from the user"""
     while 1:
-        userin=kanprompt(text) or default_int
+        userin=fattyprompt(text) or default_int
         try:
             returnint=int(userin)
         except ValueError:
@@ -803,7 +801,7 @@ def prompt_for_many_from_list(myarray,list_desc="",new_ok=0):
     
     return return_list
 
-def kan_dircheck(direc,default):
+def fatty_dircheck(direc,default):
     """return a directory that is either the given directory, or the default directory if the given directory doesnt exist"""
     if direc=="":
         direc=default

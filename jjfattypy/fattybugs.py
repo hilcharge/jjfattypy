@@ -26,19 +26,19 @@ Ok, now let's look at how to use this
 Detailed usage:
 ================
 
-What is below assumes you have a configuration file. Named .kansha.default in the base folder of the kansha package.
+What is below assumes you have a configuration file. Named .fatty.default in the base folder of the jjfattypy package.
 
 This configuration file must have, at minimum, a [bug_db] section defined, within which is a `schema_file` and a `file` specified. The `file` option specifies the file where your database is stored.
 
 Make a bug database
 -------------
    
-    > import kanconfig
-    > configs=kanconfig.kansha_configs()
+    > import fattyconfig
+    > configs=fattyconfig.fatty_configs()
     > schema_file=configs.config.get("bug_db","schema_file")
     > db_file=configs.config.get("bug_db","file")
-    > schema_filename=kanbugs.default_bug_db()
-    > kanbugs.build_db(db_file,schema_filename)
+    > schema_filename=fattybugs.default_bug_db()
+    > fattybugs.build_db(db_file,schema_filename)
 
 
 
@@ -47,19 +47,19 @@ Create a connection
 
 Connect to the default BugDB as follows:
 
-    > bdb=kanbugs.default_BugDB()
+    > bdb=fattybugs.default_BugDB()
 
-This will create a connection to the bug database defined in your .kansha.default config file
+This will create a connection to the bug database defined in your .jjfattypy.default config file
 
 If you have some different bug database, you can use the following sequence:
 
 The main way of using this module is via the BugDB class.
 
-    > bugdb=kanbugs.BugDB(DB_FILENAME)
+    > bugdb=fattybugs.BugDB(DB_FILENAME)
 
 DB_FILENAME can be retrieved from your configuration file if you wish:
 
-    > DB_FILENAME=kanbugs.default_bug_db()
+    > DB_FILENAME=fattybugs.default_bug_db()
 
 
 List all the unfixed bugs
@@ -117,7 +117,7 @@ import os
 import sqlite3
 import logging
 import datetime
-from kansha import kanio,kanconfig
+from jjfattypy import fattyio,fattyconfig
 
 class BugDB:    
 
@@ -192,7 +192,7 @@ class BugDB:
                 params[column_name]=kwargs[column_name]
             except KeyError:
                 if not force:
-                    params[column_name]=kanio.kanprompt("Enter value for {}".format(column_name))
+                    params[column_name]=fattyio.fattyprompt("Enter value for {}".format(column_name))
 
         if not len(params):
             logging.error("No data given about bug, not inserting it")
@@ -342,7 +342,7 @@ def build_db(db_filename,input_filename):
 def default_bug_db():
     """return the filename of the default bug database, this is based on relative directories"""
 
-    configs=kanconfig.kansha_configs()
+    configs=fattyconfig.fatty_configs()
 
     try:
         db_file=os.path.normpath(configs.config.get("bug_db","file"))

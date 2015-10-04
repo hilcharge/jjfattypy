@@ -1,15 +1,15 @@
 """used for setting up log parameters
 Standard usage: 
-import kanlog
-logdir=kanlog.logdir()
+import fattylog
+logdir=fattylog.logdir()
 verbose=1
 filename=os.path.join("logdir","mytestlog.log")
-kanlog.setlog(filename,verbose)
+fattylog.setlog(filename,verbose)
 """
 
 import logging
 import os
-from kansha import kanio
+from jjfattypy import fattyio
 import sys
 
 
@@ -26,11 +26,11 @@ def setlog(fn,verbose,ft='%(asctime)s [%(levelname)s] %(message)s'):
     logging.getLogger("").handlers=[]
     if verbose:
         mode=LEVELS.get("debug")
-        kanio.display("Logging mode: %i"%mode)        
+        fattyio.display("Logging mode: %i"%mode)        
     else:
         mode=LEVELS.get("info")    
     if os.path.isdir(os.path.dirname(fn)):
-        kanio.display("Found log folder %s"%os.path.dirname(fn))
+        fattyio.display("Found log folder %s"%os.path.dirname(fn))
         logging.basicConfig(filename=fn,filemode="w",level=mode,format=ft)
         logging.info("Begin logging")
         logging.critical("Testing critical")
@@ -51,7 +51,7 @@ def setlog(fn,verbose,ft='%(asctime)s [%(levelname)s] %(message)s'):
                     return 0
                     sys.exit()        
     else:
-        kanio.display("No log dir exists %s, exiting"%fn)
+        fattyio.display("No log dir exists %s, exiting"%fn)
         sys.exit()
 
 def logdir(folder=""):
@@ -59,9 +59,9 @@ def logdir(folder=""):
         try:
             folder=os.getenv("MY_LOG_DIR")
         except:
-            kanio.display("Unable to determine log directory logfile, therefore unable to execute script")
+            fattyio.display("Unable to determine log directory logfile, therefore unable to execute script")
             sys.exit()
         else:
-            kanio.display("Log directory: %s"% folder)
+            fattyio.display("Log directory: %s"% folder)
     return folder
 

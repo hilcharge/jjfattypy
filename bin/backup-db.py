@@ -1,7 +1,7 @@
 ##
 #generic python modules
 import csv
-import kanio
+import fattyio
 import pprint
 import os
 import sys,getopt
@@ -10,7 +10,7 @@ import logging
 from configparser import NoOptionError
 import shutil
 #can be used regardless of system
-from kansha import kanlog,kanconfig,kandb
+from jjfattypy import fattylog,fattyconfig,fattydb
 
 class MyScript():
 
@@ -37,11 +37,11 @@ class MyScript():
             dbsys="mysql"
         self.dbsys=dbsys    
     def set_backup_dir(self,backup_dir):
-        backup_dir_date=kanio.make_date_folder_in(backup_dir)
+        backup_dir_date=fattyio.make_date_folder_in(backup_dir)
         self.backup_dir=backup_dir_date
     def set_configs(self,config_filename=""):
         #This sets the config file for the script
-        self.configs=kanconfig.config_opts(config_filename)
+        self.configs=fattyconfig.config_opts(config_filename)
         #self.configs=tc_config.config_opts(config_filename)
     def set_backup_only(self,backup_only):
         self.backup_only=backup_only
@@ -58,17 +58,17 @@ class MyScript():
         print("log dir:",logdir)
         #if no log directory was given, make one using the standard
         if logdir=="":
-            logdir=kanlog.logdir()
+            logdir=fattylog.logdir()
         else:            
-            date_logdir=kanio.make_date_folder_in(logdir)
+            date_logdir=fattyio.make_date_folder_in(logdir)
             fulllog=os.path.join(date_logdir,logfilename)
             #fulllog=date_logdir+"//"+logfilename
             
         #start the log
         
-        kanlog.setlog(fulllog,verbose)
+        fattylog.setlog(fulllog,verbose)
         #tell the user where the log file is
-        #        kanio.display("Log file: %s"%fulllog)        
+        #        fattyio.display("Log file: %s"%fulllog)        
         #insert name of script into log
         logging.info("Script: %s"% __file__)
         
@@ -92,12 +92,12 @@ class MyScript():
         #here is where the main actions of the program take place
         #files=makedict.open_files(c
 
-        dbconnect=kandb.DBConnect(self.user,self.host,self.password,self.db,self.dbsys,noconnect=1)
+        dbconnect=fattydb.DBConnect(self.user,self.host,self.password,self.db,self.dbsys,noconnect=1)
         success=dbconnect.backup_db(self.backup_dir)        
         if success:
             logging.info("Successfully backed up db into file %s"%dbconnect.get_backup_file())
-            kanio.display("Successfully backed up db %s into file %s"%(self.db,dbconnect.get_backup_file()))
-            kanio.display("Attempting to load database into test db")
+            fattyio.display("Successfully backed up db %s into file %s"%(self.db,dbconnect.get_backup_file()))
+            fattyio.display("Attempting to load database into test db")
             #if it was successful, try reloding the db into the test db
             #if it is not a backup only mode, rebuild the database as a test database
             self.create_second_backup(dbconnect.get_backup_file())
@@ -110,7 +110,7 @@ class MyScript():
         return 0        
     def create_second_backup(self,backup_file):
         try:
-            if not kanio.map_network_drive(
+            if not fattyio.map_network_drive(
                 self.configs.config.get("backup_2","backup_2_base_drive"),
                 self.configs.config.get("backup_2","backup_2_base")
             ):
@@ -127,7 +127,7 @@ class MyScript():
                     logging.warning("Unable to find second backup file")
             else:
                 logging.info("Unable to find the backup folder %s"%self.configs.config.get("backup_2","backup_2_dir"))
-            kanio.rm_network_drive(self.configs.config.get("backup_2","backup_2_base_drive"))
+            fattyio.rm_network_drive(self.configs.config.get("backup_2","backup_2_base_drive"))
         except NoOptionError:
             logging.warning("Required configuration options in backup_2 secion not set")
         
@@ -136,14 +136,14 @@ class MyScript():
         
     def create_test_db(self,backup_file):
         bdb_dets=self.get_backup_dets()
-        kanio.display("Trying to build test database %s from the backup file"%bdb_dets["database"])
-        backup_dbconnect=kandb.DBConnect(bdb_dets["user"],bdb_dets["host"],bdb_dets["password"],bdb_dets["database"],bdb_dets["dbsys"],noconnect=1)
+        fattyio.display("Trying to build test database %s from the backup file"%bdb_dets["database"])
+        backup_dbconnect=fattydb.DBConnect(bdb_dets["user"],bdb_dets["host"],bdb_dets["password"],bdb_dets["database"],bdb_dets["dbsys"],noconnect=1)
         #now load the backed up data into the test db
         success_reload=backup_dbconnect.load_db(fullpath=backup_file,force=self.force)
         logging.info("Finished attempting to load database")
         if success_reload:
             logging.info("Successfully loaded test database %s"%bdb_dets["database"])
-            kanio.display("Successfully built database")
+            fattyio.display("Successfully built database")
         else:
             logging.error("Errors occurred while loading test database %s, check log for details" %bdb_dets["database"])                  
         return success_reload
@@ -191,12 +191,12 @@ def main(argv):
     try:
         opts,args=getopt.getopt(argv,"hvfbs:d:u:p:c:l:",["host=","database=","user=","password=","configfile=","logfile="])
     except getopt.GetoptError:
-        kanio.display(usage_str)
+        fattyio.display(usage_str)
         sys.exit(2)
 
     for opt,arg in opts:
         if opt== "-h":
-            kanio.display(usage_str)
+            fattyio.display(usage_str)
             sys.exit()
         elif opt == "-v":
             verbose=1
@@ -207,19 +207,19 @@ def main(argv):
         
         elif opt in ("-u","--user"):
             user=arg
-            kanio.display("User: "+user)
+            fattyio.display("User: "+user)
         elif opt in ("-p","--password"):
             password=arg
             if password=="":
-                kanio.display("No password giving, exiting")
+                fattyio.display("No password giving, exiting")
             else:
-                kanio.display("Password set")
+                fattyio.display("Password set")
         elif opt in ("-s","--host"):
             host=arg
-            kanio.display("Host: "+host)
+            fattyio.display("Host: "+host)
         elif opt in ("-d","--database"):
             database=arg
-            kanio.display("Database: "+ database)
+            fattyio.display("Database: "+ database)
         elif opt in ("-c","--configfile"):
             configfile=arg            
         elif opt in ("-l","--logfile"):

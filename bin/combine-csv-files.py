@@ -1,7 +1,7 @@
 ##
 #generic python modules
 import csv
-import kanio
+import fattyio
 import pprint
 import os
 import sys,getopt
@@ -9,7 +9,7 @@ import datetime
 import logging
 import glob
 #can be used regardless of system
-from kansha import kanlog,kanconfig,kandb
+from jjfattypy import fattylog,fattyconfig
 
 CONFIG_FOLDER="conf_NISSAN_TRIAL"
 
@@ -51,12 +51,12 @@ class MyScript():
         else:
             self.outputfile=outputfile
         logging.info("Using output file: %s"%self.outputfile)
-        kanio.display("Using output file: %s"%self.outputfile)
+        fattyio.display("Using output file: %s"%self.outputfile)
 
     def set_recursive(self,recursive):
         self.recursive=recursive
         if self.recursive:
-            kanio.display("Recursive NOT currently implemented")
+            fattyio.display("Recursive NOT currently implemented")
             logging.error("User wanted to perform recursive combination, not currently implemented")
     def set_filetypes(self,filetypes):
         #set filetypes to be combined
@@ -69,7 +69,7 @@ class MyScript():
     def set_configs(self,config_filename=""):
         #This sets the config file for the script
         if config_filename != "":
-            self.configs=kanconfig.kanConfig(config_filename)       
+            self.configs=fattyconfig.fattyConfig(config_filename)       
             self.hasconfig=1
         else:
             self.hasconfig=0        
@@ -86,16 +86,16 @@ class MyScript():
         print("log dir:",logdir)
         #if no log directory was given, make one using the standard
         if logdir=="":
-            logdir=kanlog.logdir()
-            date_logdir=kanio.make_date_folder_in(logdir)
+            logdir=fattylog.logdir()
+            date_logdir=fattyio.make_date_folder_in(logdir)
             fulllog=date_logdir+"//"+logfilename
         else:            
-            date_logdir=kanio.make_date_folder_in(logdir)
+            date_logdir=fattyio.make_date_folder_in(logdir)
             fulllog=date_logdir+"//"+logfilename
             
         #start the log
         
-        kanlog.setlog(fulllog,verbose)
+        fattylog.setlog(fulllog,verbose)
  
         logging.info("Script: %s"% __file__)
             
@@ -118,11 +118,11 @@ class MyScript():
         picked_files=[]
         if not self.allfiles:
             logging.info("Prompting user to select files")
-            picked_files=kanio.prompt_for_many_from_list(available_files,"input files")        
+            picked_files=fattyio.prompt_for_many_from_list(available_files,"input files")        
         else:
             picked_files=list(available_files)
         
-        kanio.combine_files(picked_files,self.outputfile,self.separator)        
+        fattyio.combine_files(picked_files,self.outputfile,self.separator)        
 
         return 0        
 
@@ -152,12 +152,12 @@ def main(argv):
     try:
         opts,args=getopt.getopt(argv,"hvart:i:o:c:l:s:",["filetypes=","input-dir=","output-file","configfile=","logfile=","separator="])
     except getopt.GetoptError:
-        kanio.display(usage_str)
+        fattyio.display(usage_str)
         sys.exit(2)
 
     for opt,arg in opts:
         if opt== "-h":
-            kanio.display(usage_str)
+            fattyio.display(usage_str)
             sys.exit()        
         elif opt == "-v":
             verbose=1

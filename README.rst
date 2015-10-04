@@ -1,41 +1,41 @@
-Kansha
+Jjfattypy
 ============
 
-kanconfig
+fattyconfig
 -----------
 
 Based on configparser
 
 To use, do the following:
 
->>>myconfigs=kanconfig.kanConfig(configfile)
+>>>myconfigs=fattyconfig.fattyConfig(configfile)
 >>>backup_dir=myconfigs.config.get("dir","backup")
 
 
-kanlog
+fattylog
 ---------
 based on python's standard logging package
 
 Set a log file:
->>>logdir=kanlog.logdir(folder="") # returns either the given log directory, or a default "MY_LOG_DIR" environment variable
->>>kanlog.setlog(filename,verbose,ft='%(asctime)s [%(levelname)s] %(message)s')
+>>>logdir=fattylog.logdir(folder="") # returns either the given log directory, or a default "MY_LOG_DIR" environment variable
+>>>fattylog.setlog(filename,verbose,ft='%(asctime)s [%(levelname)s] %(message)s')
 
 
-kanio
+fattyio
 --------
 Various functions for input, output, and directories
 
->>>wait=kanio.wait(text="Press any key to continue")
+>>>wait=fattyio.wait(text="Press any key to continue")
 
->>>icsv,ifh=kanio.open_reader_csv(infilename)
+>>>icsv,ifh=fattyio.open_reader_csv(infilename)
 
->>>kanio.combine_files(file_list,outfilename,separator,outputencodings,return_enc="utf8") ### combines the input files into a single file with outfilename, separates them by separator, and makes an output file for each of the given output encodings. It returns the filename of return_enc
+>>>fattyio.combine_files(file_list,outfilename,separator,outputencodings,return_enc="utf8") ### combines the input files into a single file with outfilename, separates them by separator, and makes an output file for each of the given output encodings. It returns the filename of return_enc
 
->>>full_date_dir=kanio.make_date_folder_in(base_dir)
+>>>full_date_dir=fattyio.make_date_folder_in(base_dir)
 
 ## list of files of the given types.
 ## if nocheck is set to 0, you will be prompted whether the file list is acceptable
->>>list_of_files=kanio.files_in_dir(dir,nocheck=0,file_types=["csv","tsv"])
+>>>list_of_files=fattyio.files_in_dir(dir,nocheck=0,file_types=["csv","tsv"])
 
 
 ## Convert a list of excel files into corresponding .tsv files
@@ -44,17 +44,17 @@ Various functions for input, output, and directories
 
 ## Display text 
 ## Actually this is much worse than print, but it may change in the future
->>>kanio.display(text)
+>>>fattyio.display(text)
 
 ## Use pprint
->>>kanio.pdisplay(some_variable)
+>>>fattyio.pdisplay(some_variable)
 
 
 ## Prompt for a value
->>>value= kanio.kanprompt(display_text,default_value="sometext")
+>>>value= fattyio.fattyprompt(display_text,default_value="sometext")
 
 ## Prompt for an integer
->>>myinteger=kanio.intprompt(display_text,default_int=0)
+>>>myinteger=fattyio.intprompt(display_text,default_int=0)
 
 ## display header
 >>> header("MY HEADER")
@@ -78,7 +78,7 @@ MY HEADER
 
 
 ## 
->>>kanio.display_numbered_list(title="My list",items=["book","movie"])
+>>>fattyio.display_numbered_list(title="My list",items=["book","movie"])
 #==========
 #My list
 #==========
@@ -103,7 +103,7 @@ MY HEADER
 >>>subset=prompt_for_many_from_list(myarray,list_desc="My list description",new_ok=0)
 
 
-kandb
+fattydb
 ----------------
 Functions and classes for dealing with database connections
 Currently, this only works for mysql
@@ -112,7 +112,7 @@ Currently, this only works for mysql
 >>> dbconnection=make_db_connect(user,host,password,database,dbsys)
 
 ## delete everything from a table
->>> kandb.delete_all_from_table(dbconnect,table)
+>>> fattydb.delete_all_from_table(dbconnect,table)
 
 ## put date in proper format for mysql datetime
 >>> input_datetime_param=mysql_datetimeformat(indatetime,offset_secs=60,return_obj=0)
@@ -126,7 +126,7 @@ Currently, this only works for mysql
 
 
 A dbconnect class
->>> dbconnect=kandb.DBConnect(user,host,password,database,dbsys,noconnect=0)
+>>> dbconnect=fattydb.DBConnect(user,host,password,database,dbsys,noconnect=0)
 ## if noconnect is 1, just return a value of whether the input params are ok
 
 >>> dbconnect.close_cnx()
@@ -166,10 +166,10 @@ A dbconnect class
 
 
 
-kantime
+fattytime
 --------
 
 only a couple functions right now:
->>>is_inrange=kantime.time_in_range(intime, starttime,endtime,offset=seconds_number)
+>>>is_inrange=fattytime.time_in_range(intime, starttime,endtime,offset=seconds_number)
 
->>>is_midnight=kantime.is_midnight(indatetime) # yes if the time is 0,0,0
+>>>is_midnight=fattytime.is_midnight(indatetime) # yes if the time is 0,0,0

@@ -5,7 +5,7 @@
 ## 
 #generic python modules
 import csv
-import kanio
+import fattyio
 import pprint
 import os
 import glob
@@ -13,7 +13,7 @@ import sys,getopt
 import datetime
 import logging
 #can be used regardless of system
-from kansha import kanlog,kanconfig,kandb
+from jjfattypy import fattylog,fattyconfig,fattydb
 
 class MyScript():
 
@@ -32,7 +32,7 @@ class MyScript():
     def set_password(self,pw):
         if pw == "":
             if not self.user==self.configs.config.get(self.config_section,"user_admin"):
-                pw=kanio.prompt_password("Enter password for user %s@%s"%(self.user,self.host))
+                pw=fattyio.prompt_password("Enter password for user %s@%s"%(self.user,self.host))
             else:
                 pw=self.configs.config.get(self.config_section,"password_admin")
         self.password=pw
@@ -51,7 +51,7 @@ class MyScript():
 
     def set_configs(self,config_filename="",config_section="main-db"):
         #This sets the config file for the script
-        self.configs=kanconfig.config_opts(config_filename)
+        self.configs=fattyconfig.config_opts(config_filename)
         if config_section=="":
             config_section="main-db"
         self.config_section=config_section
@@ -70,7 +70,7 @@ class MyScript():
         #here is where the main actions of the program take place
         #files=makedict.open_files(c        
 
-        dbconnect=kandb.DBConnect(self.user,self.host,self.password,self.db,self.dbsys,noconnect=1)
+        dbconnect=fattydb.DBConnect(self.user,self.host,self.password,self.db,self.dbsys,noconnect=1)
         input_patches=[]
         if self.all_patches:
             input_patches=glob.glob(os.path.join(self.patch_dir,"*.sql"))
@@ -147,12 +147,12 @@ def main(argv):
     try:
         opts,args=getopt.getopt(argv,"hvfpan:s:e:d:u:c:l:",["patch-name=","host=","database=","configsection=","user=","password=","configfile=","logfile="])
     except getopt.GetoptError:
-        kanio.display(usage_str)
+        fattyio.display(usage_str)
         sys.exit(2)
 
     for opt,arg in opts:
         if opt== "-h":
-            kanio.display(usage_str)
+            fattyio.display(usage_str)
             sys.exit()
         elif opt == "-v":
             verbose=1
@@ -162,20 +162,20 @@ def main(argv):
             ifile=arg
         elif opt in ("-u","--user"):
             user=arg
-            kanio.display("User: "+user)
+            fattyio.display("User: "+user)
         elif opt in ("-p","--password"):
             password=arg
             if password=="":
-                password=kanio.prompt_password()
-                kanio.display("No password giving, exiting")
+                password=fattyio.prompt_password()
+                fattyio.display("No password giving, exiting")
             else:
-                kanio.display("Password set")
+                fattyio.display("Password set")
         elif opt in ("-s","--host"):
             host=arg
-            kanio.display("Host: "+host)
+            fattyio.display("Host: "+host)
         elif opt in ("-d","--database"):
             database=arg
-            kanio.display("Database: "+ database)
+            fattyio.display("Database: "+ database)
         elif opt in ("-c","--configfile"):
             configfile=arg            
         elif opt in ("-e","--configection"):
@@ -188,7 +188,7 @@ def main(argv):
             patchname=arg
 
     if (not (allpatches or patchname != "")) or (allpatches and patchname != ""):
-        kanio.display(usage_str)
+        fattyio.display(usage_str)
         sys.exit(2)
 
 

@@ -1,6 +1,6 @@
 import csv
-from . import kanio
-import mysql.connector
+from . import fattyio
+# import mysql.connector
 import sys
 import logging
 import subprocess
@@ -11,14 +11,16 @@ import os
 import re
 import datetime
 from dateutil import parser
-from mysql.connector.constants import ClientFlag
+import sqlite3
+# from mysql.connector.constants import ClientFlag
 
-def make_db_connect(u,h,pw,db,dbsys,infile=0):
+def make_db_connect(db,dbsys,infile=0):
     #connect to a database using the given info
-    if not dbsys=="mysql":
-        kanio.display("Please set your dbsys to be mysql, other databases not currently supported")
+    if not dbsys=="sqlite3":
+        fattyio.display("Please set your dbsys to be sqlite3, or use the full current branch of fattypy other databases not currently supported")
         return 0
     cnx=None
+    conn=sqlite3.connect(db)
     if not infile:
         cnx=mysql.connector.connect(user=u,password=pw,host=h,database=db)
     else:
@@ -62,28 +64,28 @@ def mysql_dateformat(indatetime,offset_secs=60):
 
 class DBConnect:
     
-    def __init__(self,u,h,pw="",db="",dbsys="mysql",noconnect=0):
+    def __init__(self,u='',h='',pw="",db="",dbsys="mysql",noconnect=0):
         #initialize the info for dbconnection
         self.user=u
         self.host=h
         if not pw=="":
             self.password=pw     
         else:
-            pw=kanio.prompt_password("Enter password for %s@%s"%(u,h)) 
+            pw=fattyio.prompt_password("Enter password for %s@%s"%(u,h)) 
             self.password=pw
         if not db=="":
             self.database=db
         else:
-            self.database=kanio.kanprompt("Enter database to use")
+            self.database=fattyio.fattyprompt("Enter database to use")
         self.dbsys=dbsys
-        if not dbsys=="mysql":
-            logging.critical("Please set your dbsys to be mysql, other databases not currently supported")
+        if not dbsys=="sqlite3":
+            logging.critical("Please set your dbsys to be sqlite3, other databases not currently supported")
             sys.exit()
-    
+            
         else:
             logging.info("Creating database connection for user %s with password ***** to database %s@%s, a %s connection"%(u,h,db,dbsys))
 
-        cnx=mysql.connector.connect(user=u,password=pw,host=h,database=db)
+        cnx=sqlite3.connect(db)
         if not cnx:
             logging.critical("Unable to create database connection using given details, exiting")
             sys.exit()
@@ -105,26 +107,16 @@ class DBConnect:
         if not os.path.isdir(backup_dir):
             logging.critical("Specified backup %s not a directory"%backup_dir)
             sys.exit()
-        tables_path=os.path.join(backup_dir,"tables")
-        if not os.path.exists(tables_path):
-            os.makedirs(tables_path)            
+            
         logging.info("Backing up database into directory %s"% backup_dir)
         time=datetime.datetime.now().strftime("%H%M%S")
         #filename=os.path.join(backup_dir,"%s.sql"%time)
-        filename=backup_dir+"//%s.sql"%time
-        mysqldumpfull='mysqldump -h %s -u %s --password=\'%s\' --result-file=\'%s\' %s'%(self.host,self.user,self.password,filename,self.database)
-        mysqldumpseparatetables="mysqldump -h %s -u %s -p%s --tab='%s' %s"%(self.host,self.user,self.password,tables_path,self.database)
-        output,error=subprocess.Popen(shlex.split(mysqldumpfull),stdout=subprocess.PIPE,stderr=subprocess.PIPE).communicate()
-        output,error=kanio.parse_byte_strings(output,error)
+        filename=backup_dir+"//%s.backup"%time
+        dump_full=shutil.copy(self.database,filename)
+        output,error=subprocess.Popen(shlex.split(dump_full),stdout=subprocess.PIPE,stderr=subprocess.PIPE).communicate()
+        output,error=fattyio.parse_byte_strings(output,error)
         logging.info("Error: %s"%error)
         logging.info("Output: %s"%output)                    
-        if self.host=='localhost':            
-            output,error=subprocess.Popen(shlex.split(mysqldumpseparatetables),stdout=subprocess.PIPE,stderr=subprocess.PIPE).communicate()
-            output,error=kanio.parse_byte_strings(output,error)
-            logging.info("Error:%s"%error)
-            logging.info("Output:%s"%output)                    
-        else:
-            logging.info("skipping individual table output because not running on server")
         success=0 
         error_str=str(error)
         if not ("err" in error_str or "Err" in error_str or "ERR" in error_str):
@@ -163,8 +155,11 @@ class DBConnect:
                 fullpath=mysql_path_format(fullpath)
                 if charset:
                     charset="--default-character-set=%s"%charset
-                load_db_str='mysql -h %s -u %s -p%s --execute="source %s" %s %s'%(self.host,self.user,self.password,fullpath,charset,self.database)
                 
+                if self.dbsys=='mysql': 
+                    load_db_str='mysql -h %s -u %s -p%s --execute="source %s" %s %s'%(self.host,self.user,self.password,fullpath,charset,self.database)
+                elif self.dbsys=='sqlite3':
+                    load_db_str='sqlite3 {}'.format(self.database)
             else:
                 #otherwise send an error
                 logging.critical("Given input file %s does not exist" % fullpath)
@@ -178,11 +173,12 @@ class DBConnect:
         #if the load is not being forced, ask user for confirmation
         #NOTE: Please do not use force unless necessary in automated creation
         if not force:
-            if not kanio.query_yes_no("Are you sure you want to execute the file %s into the database %s"%(fullpath,self.database),default="no"):
+            if not fattyio.query_yes_no("Are you sure you want to execute the file %s into the database %s"%(fullpath,self.database),default="no"):
                 logging.info("Aborting database load at request of user")
                 sys.exit()
-        logging.info("Executing mysql command to execute commands into db %s based on input file %s"%(self.database,fullpath))            
-        output,error=subprocess.Popen(shlex.split(load_db_str),stdout=subprocess.PIPE,stderr=subprocess.PIPE).communicate()
+        logging.info("Executing mysql command to execute commands into db %s based on input file %s"%(self.database,fullpath))
+        ifh=open(fullpath,'r')
+        output,error=subprocess.Popen(shlex.split(load_db_str),stdin=ifh,stdout=subprocess.PIPE,stderr=subprocess.PIPE).communicate()
         logging.info("Error:%s"%error)
         logging.info("Output:%s"%output)                    
         error_str=str(error)
@@ -250,7 +246,7 @@ class DBConnect:
                                 values[fk_field]=foreign_keys[fk_table]
                     except KeyError:
                         logging.error("Unable to set foreign key data for field %s because no available data found")
-                        kanio.display("Unable to locate foreign key data for the field %s pointing to the %s table"%(fk_field,fk_table))
+                        fattyio.display("Unable to locate foreign key data for the field %s pointing to the %s table"%(fk_field,fk_table))
                 inserted_id=self.insert_row_to_table(table,values)
                 if table in return_id_tables:
                     return_ids[table]=inserted_id
@@ -358,8 +354,8 @@ class DBConnect:
             cursor.execute(full_select_q,params)
         except mysql.connector.errors.DatabaseError as de:
             logging.warning("Unable to execute select query %s"%str(de))
-            kanio.display("Database error: %s"%str(de))
-            kanio.display("Params: %s"%str(params))
+            fattyio.display("Database error: %s"%str(de))
+            fattyio.display("Params: %s"%str(params))
             #collation="utf8_general_ci"
 #            logging.info("Trying different collation: %s"%collation)
             conds=[col+"=BINARY %s" for col in text_cols if col in where_values]
