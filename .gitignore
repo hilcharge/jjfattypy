@@ -1,0 +1,13 @@
+*.pyc
+
+/dist/
+
+/*.egg-info
+/*.egg
+
+*~
+*#
+*.backup
+*.done
+
+.kansha
